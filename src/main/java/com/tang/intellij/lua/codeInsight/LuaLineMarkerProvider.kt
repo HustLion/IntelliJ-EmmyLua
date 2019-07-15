@@ -47,13 +47,16 @@ import com.tang.intellij.lua.ty.TyClass
  * line marker
  * Created by tangzx on 2016/12/11.
  */
-class LuaLineMarkerProvider(private val daemonSettings: DaemonCodeAnalyzerSettings, private val colorsManager:EditorColorsManager) : LineMarkerProvider {
+class LuaLineMarkerProvider : LineMarkerProvider {
+
+    private val daemonSettings = DaemonCodeAnalyzerSettings.getInstance()
+    private val colorsManager = EditorColorsManager.getInstance()
 
     private fun collectNavigationMarkers(element: PsiElement, result: MutableCollection<in LineMarkerInfo<*>>) {
         if (element is LuaClassMethodName) {
             val methodDef = PsiTreeUtil.getParentOfType(element, LuaClassMethod::class.java)!!
             val project = methodDef.project
-            val context = SearchContext(project)
+            val context = SearchContext.get(project)
             val type = methodDef.guessClassType(context)
 
             //OverridingMethod

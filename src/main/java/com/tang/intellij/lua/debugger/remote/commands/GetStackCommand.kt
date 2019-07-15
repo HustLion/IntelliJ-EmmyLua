@@ -31,7 +31,7 @@ import java.util.regex.Pattern
  *
  * Created by tangzx on 2016/12/31.
  */
-class GetStackCommand : DefaultCommand("STACK --{maxlevel=10}", 1) {
+class GetStackCommand : DefaultCommand("STACK --{maxlevel=0}", 1) {
 
     private var hasError: Boolean = false
     private var errorDataLen: Int = 0
@@ -90,7 +90,7 @@ class GetStackCommand : DefaultCommand("STACK --{maxlevel=10}", 1) {
                 if (funcName.isnil())
                     functionName = "main"
 
-                val frame = LuaMobStackFrame(functionName, position, debugProcess)
+                val frame = LuaMobStackFrame(functionName, position, i, debugProcess)
 
                 parseValues(stackValue.get(2).checktable(), frame)
                 parseValues(stackValue.get(3).checktable(), frame)

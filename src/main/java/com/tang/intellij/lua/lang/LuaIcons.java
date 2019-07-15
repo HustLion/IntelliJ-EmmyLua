@@ -24,12 +24,13 @@ import com.intellij.ui.RowIcon;
 import javax.swing.*;
 
 /**
- * Created by TangZhiXu on 2015/11/15.
- * Email:272669294@qq.com
+ * Created by tangzx on 2015/11/15.
+ * Email:love.tangzx@qq.com
  */
 public class LuaIcons {
     public static final Icon FILE = IconLoader.getIcon("/icons/lua.png");
-    public static final Icon UNITY = IconLoader.getIcon("/icons/Unity.png");
+    public static final Icon CSHARP = IconLoader.getIcon("/icons/csharp.svg");
+    public static final Icon CPP = IconLoader.getIcon("/icons/cpp.svg");
     public static final Icon CLASS = AllIcons.Nodes.Class;
     public static final Icon Alias = AllIcons.Nodes.AbstractClass;
     public static final Icon CLASS_FIELD = AllIcons.Nodes.Field;
@@ -51,7 +52,7 @@ public class LuaIcons {
     public static final Icon PROTECTED = AllIcons.Nodes.C_protected;
     public static final Icon PRIVATE = AllIcons.Nodes.C_private;
 
-    public static final Icon MODULE = IconLoader.getIcon("/icons/lua_module.svg");
+    public static final Icon MODULE = IconLoader.getIcon("/icons/module.png");
 
     public static final Icon STRING_ARG_HISTORY = AllIcons.Vcs.History;
 

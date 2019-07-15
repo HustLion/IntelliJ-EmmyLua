@@ -33,12 +33,47 @@ sourceSets {
     }
 }
 
-apply from: "patchs.gradle"
+// Appveyor CI
+if (System.env['APPVEYOR']) {
+    version = System.env['APPVEYOR_BUILD_VERSION']
+    exec {
+        executable "git"
+        args "config", "--global", "user.email", "love.tangzx@qq.com"
+    }
+    exec {
+        executable "git"
+        args "config", "--global", "user.name", "tangzx"
+    }
+}
+
+ext {
+    getRev = {
+        def os = new ByteArrayOutputStream()
+        def e = exec {
+            executable "git"
+            args "rev-parse"
+            args "HEAD"
+            standardOutput = os
+        }
+        return os.toString().substring(0, 7)
+    }
+
+    setDefaultProperty = { name, defaultValue ->
+        if (!this.hasProperty(name))
+            ext[name] = defaultValue
+    }
+}
+
 setDefaultProperty("IDEA_VER", "182")
 
 version = "${version}-IDEA${IDEA_VER}"
 
-def cfg = getVersionCfg(IDEA_VER)
+def cfg = [
+    ideaSDKVersion: ideaSDKVersion,
+    sinceBuild: sinceBuild,
+    untilBuild: untilBuild,
+    archiveName: archiveName
+]
 def rev = getRev()
 
 intellij {
@@ -64,7 +99,9 @@ def RES_DIR = "src/main/resources"
 
 buildPlugin.baseName = cfg.archiveName
 
-if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+def isWin = Os.isFamily(Os.FAMILY_WINDOWS)
+
+if (isWin) {
     task copyAttachDebugger(dependsOn: ["debugger:attach:windows:buildProduct"], type: Copy) {
         from(fileTree(dir: 'debugger/attach/windows/build/', includes: ['x64/**', 'x86/**']))
         destinationDir file("${RES_DIR}/debugger/windows")
@@ -80,18 +117,28 @@ if (Os.isFamily(Os.FAMILY_WINDOWS)) {
 }
 
 // apply patchs before build plugin
-task buildPluginWithPatchs() {
+task buildPluginWithBunch() {
     finalizedBy buildPlugin
     doLast {
+        // reset
         exec {
             executable "git"
             args "reset", "HEAD", "--hard"
         }
-        if (cfg.patchs.size() > 0) {
-            exec {
-                executable "git"
-                args = ["apply"] + cfg.patchs
-            }
+        // clean untracked files
+        exec {
+            executable "git"
+            args "clean", "-d", "-f"
+        }
+        // switch
+        exec {
+            executable isWin ? "bunch/bin/bunch.bat" : "bunch/bin/bunch"
+            args "switch", ".", IDEA_VER
+        }
+        // reset to HEAD
+        exec {
+            executable "git"
+            args "reset", rev
         }
     }
 }

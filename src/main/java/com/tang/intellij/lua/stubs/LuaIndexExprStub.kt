@@ -22,16 +22,14 @@ import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.BitUtil
 import com.intellij.util.io.StringRef
-import com.tang.intellij.lua.psi.LuaIndexExpr
-import com.tang.intellij.lua.psi.Visibility
-import com.tang.intellij.lua.psi.assignStat
-import com.tang.intellij.lua.psi.docTy
+import com.tang.intellij.lua.psi.*
 import com.tang.intellij.lua.psi.impl.LuaIndexExprImpl
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.index.LuaClassMemberIndex
 import com.tang.intellij.lua.stubs.index.StubKeys
 import com.tang.intellij.lua.ty.ITy
 import com.tang.intellij.lua.ty.ITyClass
+import com.tang.intellij.lua.ty.Ty
 import com.tang.intellij.lua.ty.TyUnion
 
 /**
@@ -44,18 +42,25 @@ class LuaIndexExprType : LuaStubElementType<LuaIndexExprStub, LuaIndexExpr>("IND
         return LuaIndexExprImpl(indexStub, this)
     }
 
-    /*override fun shouldCreateStub(node: ASTNode): Boolean {
-        val psi = node.psi as LuaIndexExpr
-        val parent = psi.parent
-        if (parent is LuaExprList || parent is LuaCallExpr)
-            return super.createStubIfParentIsStub(node)
-
-        if (psi.id != null || psi.idExpr != null) {
-            if (parent is LuaVarList) {
-                return true
+    /**
+     * a.b.c => true
+     * a.b().c => false
+     * a().b.c => false
+     */
+    private fun LuaIndexExpr.isPure(): Boolean {
+        var prev = this.prefixExpr
+        while (true) {
+            when (prev) {
+                is LuaNameExpr -> return true
+                is LuaIndexExpr -> prev = prev.prefixExpr
+                else -> return false
             }
         }
-        return false
+    }
+
+    /*override fun shouldCreateStub(node: ASTNode): Boolean {
+        val psi = node.psi as LuaIndexExpr
+        return psi.isPure()
     }*/
 
     override fun createStub(indexExpr: LuaIndexExpr, stubElement: StubElement<*>): LuaIndexExprStub {
@@ -64,13 +69,13 @@ class LuaIndexExprType : LuaStubElementType<LuaIndexExprStub, LuaIndexExpr>("IND
         val classNameSet = mutableSetOf<String>()
 
         if (stat != null) {
-            val context = SearchContext(indexExpr.project, indexExpr.containingFile, true)
-            val ty = indexExpr.guessParentType(context)
+            val ty = SearchContext.withStub(indexExpr.project, indexExpr.containingFile, Ty.UNKNOWN) {
+                indexExpr.guessParentType(it)
+            }
             TyUnion.each(ty) {
                 if (it is ITyClass)
                     classNameSet.add(it.className)
             }
-            context.forStore = false
         }
         val visibility = indexExpr.visibility
 

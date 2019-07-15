@@ -26,9 +26,9 @@ import com.tang.intellij.lua.ty.ITyClass
  *
  * Created by tangzx on 2017/3/29.
  */
-class LuaAllClassesSearch private constructor() : ExtensibleQueryFactory<ITyClass, LuaAllClassesSearch.SearchParameters>("com.tang.intellij.lua") {
+class LuaAllClassesSearch : ExtensibleQueryFactory<ITyClass, LuaAllClassesSearch.SearchParameters>("com.tang.intellij.lua") {
 
-    class SearchParameters internal constructor(val searchScope: SearchScope, val project: Project)
+    class SearchParameters(val searchScope: SearchScope, val project: Project)
 
     companion object {
 

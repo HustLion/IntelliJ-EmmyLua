@@ -33,8 +33,19 @@ interface LuaDeclarationTree {
                 ret = null
             }
             if (ret == null) {
-                val manager = if (file is LuaPsiFile && file.fileElement == null) LuaDeclarationTreeStub(file) else LuaDeclarationTreePsi(file)
-                manager.buildTree(file)
+                var manager: LuaDeclarationTree? = null
+                if (file is LuaPsiFile && !file.isContentsLoaded) {
+                    manager = LuaDeclarationTreeStub(file)
+                    try {
+                        manager.buildTree(file)
+                    } catch (e: Exception) {
+                        manager = null
+                    }
+                }
+                if (manager == null) {
+                    manager = LuaDeclarationTreePsi(file)
+                    manager.buildTree(file)
+                }
                 file.putUserData(key, manager)
                 ret = manager
             }
@@ -187,7 +198,7 @@ private open class Scope(
     }
 }
 
-private abstract class LuaDeclarationTreeBase(val file: PsiFile) : LuaStubRecursiveVisitor(), LuaDeclarationTree {
+private abstract class LuaDeclarationTreeBase(val file: PsiFile) : LuaRecursiveVisitor(), LuaDeclarationTree {
     companion object {
         val scopeKey = Key.create<Scope>("lua.object.tree.scope")
     }
@@ -229,28 +240,34 @@ private abstract class LuaDeclarationTreeBase(val file: PsiFile) : LuaStubRecurs
     }
 
     private fun push(scope: Scope, psi: PsiElement): Scope {
-        scopes.push(scope)
-        if (topScope == null)
-            topScope = scope
-        psi.putUserData(scopeKey, scope)
-        curScope?.add(scope)
-        curScope = scope
+        synchronized(scope) {
+            scopes.push(scope)
+            if (topScope == null)
+                topScope = scope
+            psi.putUserData(scopeKey, scope)
+            curScope?.add(scope)
+            curScope = scope
+        }
         return scope
     }
 
     private fun pop(): Scope {
-        val pop = scopes.pop()
-        curScope = if (scopes.isEmpty()) topScope else scopes.peek()
-        return pop
+        synchronized(scopes) {
+            val pop = scopes.pop()
+            curScope = if (scopes.isEmpty()) topScope else scopes.peek()
+            return pop
+        }
     }
 
     fun buildTree(file: PsiFile) {
-        //val t = System.currentTimeMillis()
-        scopes.clear()
-        topScope = null
-        curScope = null
-        file.accept(this)
-        //println("build tree : ${file.name}, ${System.currentTimeMillis() - t}")
+        synchronized(scopes) {
+            //val t = System.currentTimeMillis()
+            scopes.clear()
+            topScope = null
+            curScope = null
+            file.accept(this)
+            //println("build tree : ${file.name}, ${System.currentTimeMillis() - t}")
+        }
     }
 
     abstract fun findScope(psi: PsiElement): Scope?
@@ -319,12 +336,16 @@ private abstract class LuaDeclarationTreeBase(val file: PsiFile) : LuaStubRecurs
         super.visitAssignStat(o)
     }
 
+    protected open fun visitElementExt(element: PsiElement) {
+        super.visitElement(element)
+    }
+
     override fun visitElement(element: PsiElement) {
         if (element is LuaDeclarationScope) {
             push(element)
-            super.visitElement(element)
+            visitElementExt(element)
             pop()
-        } else super.visitElement(element)
+        } else visitElementExt(element)
     }
 }
 
@@ -355,7 +376,22 @@ private class LuaDeclarationTreeStub(file: PsiFile) : LuaDeclarationTreeBase(fil
     var count = 0
 
     override fun shouldRebuild(): Boolean {
-        return super.shouldRebuild() || (file as? LuaPsiFile)?.fileElement != null
+        return super.shouldRebuild() || (file as? LuaPsiFile)?.isContentsLoaded == true
+    }
+
+    override fun visitElementExt(element: PsiElement) {
+        var stub: STUB_ELE? = null
+        if (element is LuaPsiFile) {
+            stub = element.stub
+        }
+        if (element is STUB_PSI) {
+            stub  = element.stub
+        }
+        if (stub != null) {
+            for (child in stub.childrenStubs) {
+                child.psi.accept(this)
+            }
+        } else super.visitElementExt(element)
     }
 
     override fun findScope(psi: PsiElement): Scope? {

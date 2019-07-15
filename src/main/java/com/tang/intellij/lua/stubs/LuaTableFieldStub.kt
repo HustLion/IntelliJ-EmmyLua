@@ -30,6 +30,7 @@ import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.index.LuaClassMemberIndex
 import com.tang.intellij.lua.stubs.index.StubKeys
 import com.tang.intellij.lua.ty.ITy
+import com.tang.intellij.lua.ty.Ty
 import com.tang.intellij.lua.ty.TyUnion
 import com.tang.intellij.lua.ty.getTableTypeName
 
@@ -50,7 +51,9 @@ class LuaTableFieldType : LuaStubElementType<LuaTableFieldStub, LuaTableField>("
         val p2 = p1?.parent as? LuaAssignStat
         var ty: String? = null
         if (p2 != null) {
-            val type = p2.getExprAt(0)?.guessType(SearchContext(p2.project, field.containingFile, true))
+            val type = SearchContext.withStub(p2.project, field.containingFile, Ty.UNKNOWN) {
+                p2.getExprAt(0)?.guessType(it)
+            }
             if (type != null) {
                 ty = TyUnion.getPerfectClass(type)?.className
             }

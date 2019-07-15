@@ -27,6 +27,7 @@ import com.tang.intellij.lua.LuaBundle
 import com.tang.intellij.lua.comment.psi.LuaDocTagClass
 import com.tang.intellij.lua.comment.psi.LuaDocVisitor
 import com.tang.intellij.lua.psi.search.LuaShortNamesManager
+import com.tang.intellij.lua.search.SearchContext
 
 /**
  * 重复定义class
@@ -39,13 +40,21 @@ class DuplicateClassDeclaration : LocalInspectionTool() {
                 val useScope = o.useScope as? GlobalSearchScope ?: return
                 val identifier = o.nameIdentifier
                 val project = o.project
-                LuaShortNamesManager.getInstance(project).processClassesWithName(identifier.text, project, useScope, Processor {
-                    val path = it.containingFile.virtualFile.canonicalPath
-                    if (it != o && path != null) {
-                        holder.registerProblem(identifier, LuaBundle.message("inspection.duplicate_class", path), ProblemHighlightType.GENERIC_ERROR)
-                    }
-                    true
-                })
+                val context = SearchContext.get(project)
+                context.withScope(useScope) {
+                    LuaShortNamesManager
+                            .getInstance(project)
+                            .processClassesWithName(identifier.text, context, Processor {
+                        val path = it.containingFile?.virtualFile?.canonicalPath
+                        if (it != o && path != null) {
+                            holder.registerProblem(
+                                    identifier,
+                                    LuaBundle.message("inspection.duplicate_class", path),
+                                    ProblemHighlightType.GENERIC_ERROR)
+                        }
+                        true
+                    })
+                }
             }
         }
     }

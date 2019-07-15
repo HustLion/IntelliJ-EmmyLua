@@ -43,11 +43,12 @@ class LuaNameSuggestionProvider : NameSuggestionProvider {
     private fun collectNames(type: ITy, context: SearchContext, collector: (name: String, suffix: String, preferLonger: Boolean) -> Unit) {
         when (type) {
             is ITyClass -> {
-                var cur: ITy? = type
-                while (cur != null) {
-                    if (!cur.isAnonymous)
-                        collector(fixName(type.className), "", false)
-                    cur = cur.getSuperClass(context)
+                if (!type.isAnonymous)
+                    collector(fixName(type.className), "", false)
+                TyClass.processSuperClass(type, context) { superType ->
+                    if (!superType.isAnonymous)
+                        collector(fixName(superType.className), "", false)
+                    true
                 }
             }
             is ITyArray -> collectNames(type.base, context) { name, _, _ ->
@@ -73,7 +74,7 @@ class LuaNameSuggestionProvider : NameSuggestionProvider {
                     val paramIndex = p1.getIndexFor(ele)
                     val p2 = p1.parent as? LuaCallExpr
                     if (p2 != null) {
-                        val ty = p2.guessParentType(SearchContext(ele.project))
+                        val ty = p2.guessParentType(SearchContext.get(ele.project))
                         TyUnion.each(ty) {
                             if (it is ITyFunction) {
                                 it.process(Processor { sig ->
@@ -105,7 +106,7 @@ class LuaNameSuggestionProvider : NameSuggestionProvider {
         search.forEach { getNames(it, set) }
 
         if (psi is LuaTypeGuessable) {
-            val context = SearchContext(psi.getProject())
+            val context = SearchContext.get(psi.getProject())
             val type = psi.guessType(context)
             if (!Ty.isInvalid(type)) {
                 val names = HashSet<String>()

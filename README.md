@@ -6,7 +6,8 @@
 [![Jetbrains plugin](https://img.shields.io/jetbrains/plugin/v/9768-emmylua.svg?style=flat-square)](https://plugins.jetbrains.com/plugin/9768-emmylua)
 [![donate](https://img.shields.io/badge/donate-emmy-FF69B4.svg?style=flat-square)](https://emmylua.github.io/donate.html)
 [![Join the chat at gitter](https://img.shields.io/badge/chat-on%20gitter-46BC99.svg?style=flat-square)](https://gitter.im/emmylua/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
-[![加入QQ群](https://img.shields.io/badge/chat-QQ群-46BC99.svg?style=flat-square)](//shang.qq.com/wpa/qunwpa?idkey=f1acce081c45fbb5670ed5f880f7578df7a8b84caa5d2acec230ac957f0c1716)
+[![加入QQ群](https://img.shields.io/badge/chat-QQ(1)群-46BC99.svg?style=flat-square)](https://jq.qq.com/?_wv=1027&k=5Br83i5)
+[![加入QQ群](https://img.shields.io/badge/chat-QQ(2)群-46BC99.svg?style=flat-square)](https://jq.qq.com/?_wv=1027&k=5EeI0Sm)
 
 Version | CI status
 --------|----------
@@ -14,11 +15,10 @@ IDEA 171|[![Build status](https://ci.appveyor.com/api/projects/status/m25uajpqa2
 IDEA 172-181|[![Build status](https://ci.appveyor.com/api/projects/status/m25uajpqa2fft8ah?svg=true)](https://ci.appveyor.com/project/EmmyLua/intellij-emmylua)
 IDEA 182|[![Build status](https://ci.appveyor.com/api/projects/status/xvahlg1ceiy16dxl?svg=true)](https://ci.appveyor.com/project/EmmyLua/intellij-emmylua-7n83m)
 
-QQ交流群：`29850775`
+QQ交流群：1群：`29850775` 2群：`529914962`
 (最新版本以及部分视频演示在群文件中下载)
 
 ![snapshot](/snapshot/overview.gif)
-
 
 ## Find usages
 ![find_usages](/snapshot/find_usages.gif)
@@ -85,6 +85,14 @@ QQ交流群：`29850775`
 | Lua Profiler                         |    ✔     |
 | ... .etc                             |          |
 
+## Road map
+- [ ] Attach debugger rewriting
+- [ ] Remote debugger rewriting
+- [ ] Data follow inspections
+- [ ] Ctrl follow inspections
+- [ ] `@interface` support
+- [ ] API Hub
+
 ## Build environment requirements
 
 - Visual Studio 2015
@@ -105,12 +113,14 @@ QQ交流群：`29850775`
 **Contributors**
 - [**@dsmgit** dsmgit](https://github.com/dsmgit)
 - [**@Perryvw** Perry van Wesel](https://github.com/Perryvw)
-- [**@mqualizz** Marco Qualizza](https://github.com/mqualizz)
-- [**@taigacon** taigacon](https://github.com/taigacon)
 - [**@ice1000** Tesla Ice Zhang](https://github.com/ice1000)
-- [**@LiamYao** Yao](https://github.com/LiamYao)
-- [**@luchuanbaker** luchuanbaker](https://github.com/luchuanbaker)
-- [**@Dauch** Tyler Dauch](https://github.com/Dauch)
+- [**@mqualizz** Marco Qualizza](https://github.com/mqualizz)
 - [**@jb574** jb574](https://github.com/jb574)
+- [**@luchuanbaker** luchuanbaker](https://github.com/luchuanbaker)
+- [**@LiamYao** Yao](https://github.com/LiamYao)
+- [**@Dauch** Tyler Dauch](https://github.com/Dauch)
+- [**@Christopher-St** Christopher-St](https://github.com/Christopher-St)
+- [**@taigacon** taigacon](https://github.com/taigacon)
 - [**@KKKIIO** KKKIIO](https://github.com/KKKIIO)
 - [**@zj6882917** zj6882917](https://github.com/zj6882917)
+- [**@fangfang1984** fangfang1984](https://github.com/fangfang1984)

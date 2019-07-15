@@ -33,7 +33,7 @@ class MatchFunctionSignatureInspection : StrictInspection() {
                     if (id != null) {
                         if (o.parent is LuaCallExpr && o.colon != null) {
                             // Guess parent types
-                            val context = SearchContext(o.project)
+                            val context = SearchContext.get(o.project)
                             o.exprList.forEach { expr ->
                                 if (expr.guessType(context) == Ty.NIL) {
                                     // If parent type is nil add error
@@ -47,11 +47,11 @@ class MatchFunctionSignatureInspection : StrictInspection() {
                 override fun visitCallExpr(o: LuaCallExpr) {
                     super.visitCallExpr(o)
 
-                    val searchContext = SearchContext(o.project)
+                    val searchContext = SearchContext.get(o.project)
                     val prefixExpr = o.expr
                     val type = prefixExpr.guessType(searchContext)
 
-                    if (type is TyPsiFunction) {
+                    if (type is TyFunction) {
                         val perfectSig = type.findPerfectSignature(o)
                         annotateCall(o, perfectSig, searchContext)
                     } else if (prefixExpr is LuaIndexExpr) {
